@@ -180,3 +180,90 @@ TEMPLATES = [
 2.在HTML中使用标准的格式引用
 ```
 
+**重点**:使用for循环或者if等条件语句，需要使用`{% %}`将条件语句`for...in..., if...elif...else...等`包裹起来，使用变量需要使用`{{  }}`将变量包裹起来，使用获取字典的value，需要使用`.`的方式去获取value，不能使用`dict['key']`的方式。
+
+​	views函数的编写：
+
+```python
+def tmp(request):
+    name = 'xiaoming'
+    l = ['上午', '中午', '下午']
+    dic = {'姓名':'小明', '年龄':17, '性别':'男'}
+    # 传递需要的参数，以字典的方式
+    return render(request, 'tmp.html', {'n1': name, 'n2': l, 'n3':dic})
+```
+
+​	模板HTML的编写：
+
+```python
+<body>
+    <!-- 直接读取变量或者获取列表中的值用法 -->
+    <div>{{ n1 }}</div>
+    <div>{{n2}}</div>
+    <div>{{n2.0}}</div>
+    <div>{{n2.1}}</div>
+    <div>{{n2.2}}</div>
+    {% for item in n2 %}
+    <span>{{ item }}</span>
+    {% endfor %}
+    <hr>
+    <!-- 获取字典值中的用法 -->
+    <div>
+        {% for k, v in n3.items %}
+        <li>字典的key为: {{k}}, value为: {{v}}</li>
+        {% endfor %}
+    </div>
+    <hr>
+    <!-- 在模板中也可以使用判断语句 -->
+    <div>
+        {% if n1 == 'xiaoming' %}
+        <h2>aaaa</h2>
+        {% elif n1 == 'xiaoli' %}
+        <h2>bbbb</h2>
+        {% else %}
+        <h2>ccc</h2>
+        {% endif %}
+    </div>
+        <hr>
+    <div>
+        <h3>新闻内容</h3>
+        {%for item in data_list%}
+        <!-- 注意，获取字典信息，需要使用.模式来获取，不能使用dict['key']的方式获取 -->
+        <li>新闻标题：{{item.news_title}}, 新闻发布时间{{item.post_time}}</li>
+        {%endfor%}
+    </div>
+</body>
+```
+
+DJango中templates处理含模板语法的HTM流程
+
+![image-20230902234023252](F:\DjangoSite\djangodemo\assets\image-20230902234023252.png)
+
+## 六、 请求与响应
+
+注意：
+
+1. DJango中的请求和views函数中的`request`对象息息相关，其属性和方法可以获取所有浏览器请求传递的request信息。
+2. 响应中的redirect函数，是将重定向的地址返还给浏览器，由浏览器自己发起请求，请求数据不会由DJango中转。
+
+```python
+解释DJango中常见请求与响应工作的伪代码
+
+def req_resp(request):
+    #  请求
+    # 1、接收如request.method（返回request请求的方法）
+    print(request.method)
+    # 2、接收GET请求，附带的参数信息，同理，接收POST方法的参数信息为request.POST,此时返回的是一个字典
+    arg = request.GET
+    print(arg)
+    return HttpResponse(arg)
+    #  响应
+    # 3、返回 HttpResponse 对象中的content字符串信息
+    return HttpResponse('Hello World')
+    # 4、返回render对象，首先读取HTML网页内容->将模板字符串替换，渲染页面->完成渲染之后，以字符串的方式返回给用户浏览器
+    #  其中可以传递参数，常见数据类型都可以传递
+    return render(request, 'tmp.html', {'n1': name, 'n2': l, 'n3': dic, 'data_list': data_dict})
+    # 5、返回redirect对象，让浏览器重定向到其他网页
+    return redirect('https://www.baidu.com')
+```
+

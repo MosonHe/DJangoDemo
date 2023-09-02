@@ -24,5 +24,6 @@ urlpatterns = [
     # 绑定路由index/和视图中函数index
     path('index/', views.index),
     path('test/', views.test),
-    path('tmp/', views.tmp)
+    path('tmp/', views.tmp),
+    path('req_resp', views.req_resp)
 ]

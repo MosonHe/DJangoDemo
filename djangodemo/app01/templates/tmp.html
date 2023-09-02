@@ -5,6 +5,7 @@
     <title>title</title>
 </head>
 <body>
+    <!-- 直接读取变量或者获取列表中的值用法 -->
     <div>{{ n1 }}</div>
     <div>{{n2}}</div>
     <div>{{n2.0}}</div>
@@ -13,5 +14,31 @@
     {% for item in n2 %}
     <span>{{ item }}</span>
     {% endfor %}
+    <hr>
+    <!-- 获取字典值中的用法 -->
+    <div>
+        {% for k, v in n3.items %}
+        <li>字典的key为: {{k}}, value为: {{v}}</li>
+        {% endfor %}
+    </div>
+    <hr>
+    <!-- 在模板中也可以使用判断语句 -->
+    <div>
+        {% if n1 == 'xiaoming' %}
+        <h2>aaaa</h2>
+        {% elif n1 == 'xiaoli' %}
+        <h2>bbbb</h2>
+        {% else %}
+        <h2>ccc</h2>
+        {% endif %}
+    </div>
+    <hr>
+    <div>
+        <h3>新闻内容</h3>
+        {%for item in data_list%}
+        <!-- 注意，获取字典信息，需要使用.模式来获取，不能使用dict['key']的方式获取 -->
+        <li>新闻标题：{{item.news_title}}, 新闻发布时间{{item.post_time}}</li>
+        {%endfor%}
+    </div>
 </body>
 </html>
