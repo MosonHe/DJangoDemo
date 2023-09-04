@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>用户列表</title>
+</head>
+<body>
+    <h1>用户列表</h1>
+    <a href="/user/add/">添加用户</a>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>密码</th>
+                <th>年龄</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in data_obj %}
+                <tr>
+                    <th>{{ obj.id }}</th>
+                    <th>{{ obj.name }}</th>
+                    <th>{{ obj.password }}</th>
+                    <th>{{ obj.age }}</th>
+                    <!-- 通过定义一个删除按钮，通过get方法传参id，以id的方式删除用户信息 -->
+                    <th><a href="/user/delete/?uid={{ obj.id }}">删除</a></th>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

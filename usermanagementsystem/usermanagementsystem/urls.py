@@ -1,5 +1,5 @@
 """
-URL configuration for djangodemo project.
+URL configuration for usermanagementsystem project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -16,22 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-#  从创建的App中导入视图模块
-from app01 import views
 
 urlpatterns = [
-    #path('admin/', admin.site.urls),
-    # 绑定路由index/和视图中函数index
-    path('index/', views.index),
-    path('test/', views.test),
-    path('tmp/', views.tmp),
-    path('req_resp/', views.req_resp),
-    path('login/', views.login),
-    path('orm/',  views.orm),
-
-    # 用户管理案例
-    path('user/list/', views.user_list),
-    path('user/add/', views.user_add),
-    path('user/delete/', views.user_delete)
-
+    path('admin/', admin.site.urls),
 ]

@@ -1,4 +1,6 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
+from app01.models import UserInfo, Department
+
 
 # Create your views here.
 def index(request):
@@ -40,3 +42,78 @@ def req_resp(request):
     # 5、返回redirect对象，让浏览器重定向到其他网页
     # return redirect('https://www.baidu.com')
     pass
+
+def login(request):
+    # 如果请求方法是GET，那么则返回一个render对象，将login登录页面返回。
+    if request.method == 'GET':
+        return render(request, 'login.html')
+    # 如果请求方法是POST，则取到表单提交的信息，做判断
+    username = request.POST.get('user')
+    password = request.POST.get('pwd')
+    if username == 'admin' and password == '123':
+        return redirect('https://www.baidu.com')
+    # 当账号密码错误的时候，返回一个render，将提示以变量的方式传递到HTML页面进行渲染
+    return render(request, 'login.html', {'error_msg':'账号或者密码错误'})
+
+def orm(request):
+    # 使用DJango的ORM框架对数据做基本的增删改查操作。
+    # 1、新建 使用模型类名.objects.create(**kwargs)来新增记录
+    # Department.objects.create(title = '销售部')
+    # Department.objects.create(title = 'IT部')
+    # Department.objects.create(title = '运营部')
+
+    # UserInfo.objects.create(name = 'hexs', password = '123', age = '18')
+    # UserInfo.objects.create(name = 'zhangsan', password = '123', age = '28')
+    # UserInfo.objects.create(name = 'lisi', password = '123', age = '38')
+
+    # 2、删除 .filter()方法可以做条件过滤，然后再使用delete()方法删除。
+    # UserInfo.objects.filter(id = 3).delete()
+
+    # all()方法表示选择全部
+    # Department.objects.all().delete()
+
+    # 3、获取数据 模型类名.objects.all()或者模型类名.objects.filter()  
+    # 返回的是一个QuerySet对象列表，可以通过.属性的方式去获取表字段属性
+    # data_list = UserInfo.objects.all()
+    # print(type(data_list), data_list)
+    # for obj in data_list:
+    #     print(obj.name, obj.password, obj.age)
+
+    # data_list = UserInfo.objects.filter(id = 1)
+    # print(data_list)
+    # # 注意，返回的是一个QuerySet对象列表，如果要以这种方式获取，必须要通过切片的方式去使用
+    # obj = data_list[0]
+    # print(obj.id, obj.name, obj.password,  obj.age)
+    
+    # 如果知道获取的数据只有一行，则可以使用.first()方法直接获取到QuerySet对象，也就是取查询返回的QuerySet对象列表中的第一个元素
+    # obj = UserInfo.objects.filter(id = 1).first()
+    # print(obj.id, obj.name, obj.password,  obj.age)
+
+    # 4、更新数据 先做条件过滤，再做更新数据的update操作。
+    # UserInfo.objects.all().update(age = 20)
+    # UserInfo.objects.filter(id = 1).update(password = 1234)
+
+
+    return HttpResponse('执行成功')
+
+def user_list(request):
+    # 查询获取数据库中的全部信息
+    data_obj = UserInfo.objects.all()
+    return render(request, 'user_list.html', {'data_obj':data_obj})
+
+def user_add(request):
+    # 添加一个用户
+    if request.method == 'GET':
+        return render(request, 'user_add.html')
+    # request.POST返回的是一个QueryDict对象，可以使用字典的方法
+    name = request.POST.get('user')
+    password = request.POST.get('pwd')
+    age = request.POST.get('age')
+    UserInfo.objects.create(name=name, password=password, age=age)
+    return redirect('/user/list')
+
+def user_delete(request):
+    # 删除用户
+    uid = request.GET.get('uid')
+    UserInfo.objects.filter(id = uid).delete()
+    return redirect('/user/list/')

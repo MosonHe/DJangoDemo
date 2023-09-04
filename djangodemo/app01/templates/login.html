@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>login</title>
+</head>
+<body>
+    <!-- 表单提交方法为post，提交的路由是login -->
+    <form method="post" action="/login/">
+        <!-- 如果使用DJango中的模板，在表单请求的时候，必须设置一个{% csrf_token %}语法，否则会报错403，此方法的作用是为了校验请求方的真实性 -->
+        {% csrf_token %}
+        <input type="text" name="user" placeholder="用户名">
+        <input type="password" name="pwd" placeholder="密码">
+        <input type="submit" value="提交">
+        <span>{{ error_msg }}</span>
+    </form>
+</body>
+</html>
