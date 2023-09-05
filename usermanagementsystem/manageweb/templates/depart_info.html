@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>部门列表</title>
+</head>
+<body>
+    <a href="/depart/add/">添加部门</a>
+    {% for obj in obj_list %}
+    <li>部门ID:{{ obj.id }} 部门名称:{{ obj.title }} 部门描述:{{ obj.desc }}</li>
+    {% endfor %}
+</body>
+</html>

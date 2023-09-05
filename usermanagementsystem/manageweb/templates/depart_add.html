@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>添加用户</title>
+</head>
+<body>
+<div>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text", name="title", placeholder="部门名称">
+        <input type="text", name="depart_id", placeholder="部门ID">
+        <input type="text", name="desc", placeholder="部门描述信息">
+        <input type="submit", placeholder="提交">
+    </form>
+</div>
+</body>
+</html>
