@@ -27,4 +27,5 @@ urlpatterns = [
     path('depart/<int:nid>/edit/', views.depart_edit),
     # 用户管理
     path('user/info/', views.user_info),
+    path('user/add/', views.user_add),
 ]

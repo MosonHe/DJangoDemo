@@ -753,7 +753,7 @@ urlpatterns = [
 {% endblock %}
 ```
 
-### 5.一些常用的方法
+### 5.在做查询操作时一些常用的方法
 
 - datetime类型字符串格式化
 - 在定义模型类的时候,加入了gedner_choices元组做约束，想要获取键的详细值
@@ -806,5 +806,136 @@ def user_info(request):
             </tr>
             {% endfor %}
         </tbody>
+```
+
+## 五、初识Form和ModelForm
+
+### 1.Form的基本用法
+
+1.编写views.py
+
+```python
+# 定义一个类，继承Form,手动绑定模型类中的类属性
+class MyForm(Form):
+    name = forms.charField(widget=forms.Input)
+    pwd = forms.charField(widget=forms.Input)
+# 定义操作方法，初始化Form子类，传递参数到HTML页面
+def user_add(request):
+    myform = MyForm()
+    return render('request', 'user_add.html', {'myform':myform})
+```
+
+2.在HTML页面使用
+
+```html
+<!--写法1-->
+<form method="post">
+    {% for field in myform %}
+        {{ field }}
+    {% ennfor %}
+</form>
+<!--写法2-->
+<form method="post">
+	{{ myform.name }}
+    {{ myform.pwd }}
+</form>
+```
+
+此时会按照在MyForm中定义的字段，自动生成HTML中的input标签
+
+### 2.ModelForm的基本用法
+
+1.编写views.py
+
+```python
+# 定义一个form类，继承modelform
+class MyForm(ModelForm):
+    # 固定写法
+    class Meta:
+        # 和模型类中的类名、类属性保持一致
+        model = UserInfo
+        filed = ["name", "password"]
+        
+# 定义操作方法，初始化Form子类，传递参数到HTML页面
+def user_add(request):
+    myform = MyForm()
+    return render('request', 'user_add.html', {'myform':myform})
+```
+
+2.在HTML页面使用
+
+```html
+<!--写法1-->
+<form method="post">
+    {% for field in myform %}
+        {{ field }}
+    {% ennfor %}
+</form>
+<!--写法2-->
+<form method="post">
+	{{ myform.name }}
+    {{ myform.pwd }}
+</form>
+```
+
+两者相比，ModelForm在处理时候更加方便。
+
+### 3.ModelForm使用案例详解
+
+1.编写views.py
+
+```python
+# 导入forms模块
+from django import forms
+# 定义模型类继承ModelForm
+class UserModelForm(forms.ModelForm):
+    # 默认只校验数据是否为空，如果需要定义某个字段的校验方法，需要自定义属性
+    name = forms.CharField(min_length=3, label='姓名')
+
+    # 默认定义model和fileds属性
+    class Meta:
+        model = models.UserInfo
+        fields = ['name', 'password', 'age', 'gender', 'account', 'create_time', 'depart']
+    # 重写__init__方法，在fields对象的插件方法中添加属性
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            field.widget.attrs = {"placeholder":field.label}
+# 这里面的用户添加有用户校验的部分
+def user_add(request):
+    if request.method == 'GET':
+        form = UserModelForm()
+        return render(request, 'user_add.html', {'form':form})
+    # 实例化modelform对象，将POST请求数据传递给modelform做数据校验
+    # 如果在UserModelForm中定义的是默认的fields，则默认只校验数据是否为空
+    form = UserModelForm(data = request.POST)
+    # 如果数据校验成功
+    if form.is_valid():
+        form.save()
+        return redirect('/user/info/')
+    # 数据校验失败
+    return render(request, 'user_add.html', {'form':form})
+```
+
+2.编写HTML页面
+
+```html
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- novalidate取消浏览器本身的数据校验 -->
+<form method="post" novalidate>
+    {% csrf_token %}
+    
+    {% for field in form %}
+    <label>{{field.label}}</label>
+        {{field}}
+        <!-- 当数据校验有错的时候，给出报错提示，field.errors是一个列表，取第一条报错展示 -->
+        <!-- 在DJango的模板语法中，取列表的第一个值需要使用.0的方式，不能使用[0] -->
+        <span>{{ field.errors.0 }}</span>
+    {% endfor %}
+    <input type="submit" placeholder="提交">
+</form>
+{% endblock %}
 ```
 
