@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>修改用户</title>
+</head>
+<body>
+<div>
+    <h3>修改用户</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text", name="title", placeholder="部门名称", value="{{ first_obj.title }}">
+        <input type="text", name="depart_id", placeholder="部门ID", value="{{ first_obj.depart_id }}">
+        <input type="text", name="desc", placeholder="部门描述信息", value="{{ first_obj.desc }}">
+        <input type="submit", placeholder="提交">
+    </form>
+</div>
+</body>
+</html>

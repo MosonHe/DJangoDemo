@@ -1,12 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <title>信息列表</title>
-</head>
-<body>
+<!-- 继承模板'layout.html' -->
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- 中间填充不一样的内容 -->
 <div>
-    <a href="/depart/add/">添加部门</a>
+    <a href="#">添加人员</a>
     <table>
         <thead>
             <tr>
@@ -30,5 +28,4 @@
         </tbody>
     </table>
 </div>
-</body>
-</html>
+{% endblock %}

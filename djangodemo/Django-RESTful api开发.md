@@ -596,12 +596,160 @@ class UserInfo(models.Model):
     depart = models.OneToOneField(to="Department", to_field="depart_id", default= 10, on_delete=models.SET_DEFAULT)
 ```
 
-## 三、使用
+## 三、使用模型类创建表结构
 
 执行 命令，创建数据库表结构
 
 ```python
 python manage.py makemigrations
 python manage.py migrate
+```
+
+## 四、增删改查逻辑处理
+
+### 1.编写views.py，添加增删改查逻辑
+
+```python
+from django.shortcuts import render, redirect
+from manageweb import models
+
+# Create your views here.
+
+def depart_info(request):
+    # 返回的是queryset对象列表
+    obj_list = models.Department.objects.all()
+    return render(request, 'depart_info.html', {'obj_list':obj_list})
+
+def depart_add(request):
+    if request.method == 'GET':
+        return render(request, 'depart_add.html')
+    title = request.POST.get('title')
+    depart_id = request.POST.get('depart_id')
+    desc = request.POST.get('desc')
+    result = models.Department.objects.create(title = title, depart_id = depart_id, desc = desc)
+    return redirect('/depart/info/')
+
+def depart_delete(request):
+    # 获取nid
+    nid = request.GET.get('nid')
+    # 删除
+    models.Department.objects.filter(id = nid).delete()
+    return redirect('/depart/info/')
+
+def depart_edit(request, nid):
+    if request.method == 'GET':
+        first_obj = models.Department.objects.filter(id = nid).first()
+        return render(request, 'depart_edit.html', {'first_obj':first_obj})
+    title = request.POST.get('title')
+    depart_id = request.POST.get('depart_id')
+    desc = request.POST.get('desc')
+    models.Department.objects.filter(id = nid).update(title = title, depart_id=depart_id, desc=desc)
+    return redirect('/depart/info/')
+```
+
+### 2.定义urls.py中路由绑定
+
+==这里面有新的用法，可以在路由中直接传递参数，如`depart/<int:nid>/edit/`，其中`<int:nid>`表示发起请求时需要携带一个为整数的nid参数==
+
+```python
+from django.contrib import admin
+from django.urls import path
+from manageweb import views
+
+urlpatterns = [
+    # path('admin/', admin.site.urls),
+    path('depart/info/', views.depart_info),
+    path('depart/add/', views.depart_add),
+    path('depart/delete/', views.depart_delete),
+    path('depart/<int:nid>/edit/', views.depart_edit),
+]
+```
+
+### 3.编写HTML页面，实现数据的增改查页面
+
+```html
+<!--增加-->
+<body>
+<div>
+    <h3>添加用户</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text", name="title", placeholder="部门名称">
+        <input type="text", name="depart_id", placeholder="部门ID">
+        <input type="text", name="desc", placeholder="部门描述信息">
+        <input type="submit", placeholder="提交">
+    </form>
+</div>
+</body>
+
+<!--修改-->
+<div>
+    <h3>修改用户</h3>
+    <form method="post">
+        {% csrf_token %}
+        <input type="text", name="title", placeholder="部门名称", value="{{ first_obj.title }}">
+        <input type="text", name="depart_id", placeholder="部门ID", value="{{ first_obj.depart_id }}">
+        <input type="text", name="desc", placeholder="部门描述信息", value="{{ first_obj.desc }}">
+        <input type="submit", placeholder="提交">
+    </form>
+</div>
+<!--显示-->
+<div>
+    <a href="/depart/add/">添加部门</a>
+    <table>
+        <thead>
+            <tr>
+                <th>部门ID</th>
+                <th>部门名称</th>
+                <th>部门描述</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in obj_list %}
+            <tr>
+                <th>{{ obj.id }}</th>
+                <th>{{ obj.title }}</th>
+                <th>{{ obj.desc }}</th>
+                <td>
+                    <a href="/depart/{{ obj.id }}/edit/">编辑</a>
+                    <a href="/depart/delete/?nid={{ obj.id }}">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+```
+
+### 4.DJango中的HTML模板继承语法
+
+定义模板
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>layout模板</title>
+</head>
+<body>
+    <!-- 在模板中定义占位符，子页面继承之后可以重写-->
+    <!-- 此类占位符可以有多个，其中content是占位名称，可以自定义 -->
+    {% block content %}
+    {% endblock %}
+</body>
+</html>
+```
+
+子页面继承模板
+
+```python
+<!-- 继承模板'layout.html' -->
+{% extends 'layout.html' %}
+
+{% block content %}
+<!-- 中间填充不一样的内容 -->
+{% endblock %}
 ```
 
