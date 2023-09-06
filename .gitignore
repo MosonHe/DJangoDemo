@@ -1,6 +1,6 @@
-./usermanagementsystem/usermanagementsystem/settings.py
-./usermanagementsystem/manageweb/
-./usermanagementsystem/usermanagementsystem/__pycache__/
-./djangodemo/djangodemo/settings.py
-./djangodemo/djangodemo/__pycache__/
-./djangodemo/app01/__pycache__/
+usermanagementsystem/usermanagementsystem/settings.py
+usermanagementsystem/manageweb/
+usermanagementsystem/usermanagementsystem/__pycache__/
+djangodemo/djangodemo/settings.py
+djangodemo/djangodemo/__pycache__/
+djangodemo/app01/__pycache__/
