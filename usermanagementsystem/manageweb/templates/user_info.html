@@ -33,8 +33,8 @@
                 <!-- Python中的固定写法 -->
                 <th>{{ obj.depart.title }}</th>
                 <td>
-                    <a href="#">编辑</a>
-                    <a href="#">删除</a>
+                    <a href="/user/{{ obj.id }}/edit/">编辑</a>
+                    <a href="/user/{{ obj.id }}/delete/">删除</a>
                 </td>
             </tr>
             {% endfor %}

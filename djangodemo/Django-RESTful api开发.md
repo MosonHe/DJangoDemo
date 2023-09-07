@@ -882,7 +882,7 @@ def user_add(request):
 
 ### 3.ModelForm使用案例详解
 
-1.编写views.py
+1.编写views.py 实现增删改查能力
 
 ```python
 # 导入forms模块
@@ -901,7 +901,7 @@ class UserModelForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             field.widget.attrs = {"placeholder":field.label}
-# 这里面的用户添加有用户校验的部分
+
 def user_add(request):
     if request.method == 'GET':
         form = UserModelForm()
@@ -914,7 +914,27 @@ def user_add(request):
         form.save()
         return redirect('/user/info/')
     # 数据校验失败
-    return render(request, 'user_add.html', {'form':form})
+    return render(request, 'user_add.html', {'form':form}) 
+
+def user_edit(request, nid):
+    # 根据用户ID获取第一条数据
+    first_obj = models.UserInfo.objects.filter(id = nid).first()
+    if request.method == 'GET':
+        # 实例化modelform对象，将返回的模型实例对象传递给instance参数，可以做到自动显示内容
+        form = UserModelForm(instance = first_obj)
+        return render(request, 'user_edit.html', {'form':form})
+    # 将请求获取到的参数传递给modelform，将查询对象传递给instance，表示修改这个实例的数据，否则会新增一条数据
+    form = UserModelForm(data = request.POST, instance = first_obj)
+    # 数据校验成功
+    if form.is_valid():
+        form.save()
+        return redirect('/user/info/')
+    # 数据校验失败
+    return render(request, 'user_edit.html/', {'form':form})
+
+def user_delete(requst, nid):
+    models.UserInfo.objects.filter(id = nid).delete()
+    return redirect('/user/info/')
 ```
 
 2.编写HTML页面
@@ -939,3 +959,84 @@ def user_add(request):
 {% endblock %}
 ```
 
+### 4.ModelForm和ORM模型的一些其他用法
+
+- 使用OMR框架时候，可以使用order_by ()方法排序，倒序使用`-`,如`order_by('-level')`,默认为正序排列
+
+```python
+# 等于select * from table order by level desc或者asc
+models.UserInfo.objects.all().order_by("-level")
+```
+
+- 使用ModelForm定义嵌套Meta类时，关于fields属性
+
+```python
+class UserModelForm(forms.ModelForm):
+    class Meta:
+        model = models.UserInfo
+        # 第一种方式，直接手动定义fields
+        fields = ['name', 'password', 'age', 'gender', 'account', 'create_time', 'depart']
+        # 第二种方式，使用所有字段
+        fields = "__all__"
+        # 第三种方式，排除那个字段，剩余的使用
+        exclude = ['password']
+```
+
+- 使用正则表达式，来做数据填充校验
+
+```python
+# 导入正则校验的模块
+from django.core.validators import RegexValidator
+class UserModelForm(forms.ModelForm):
+    # 通过Form手动定义属性的时候，传递validators参数，为一个列表。
+    # 其中，通过RegexValidator定义正则表达式，和校验失败之后返回的message
+    mobile = forms.CharField(
+                            label='手机号',
+                            validators=[RegexValidator(r'^1[3-9]\d{9}$', '手机号格式错误')]
+    )
+    class Meta:
+        model = models.UserInfo
+        fields = ['name', 'password', 'age', 'gender', 'account', 'create_time', 'depart']
+```
+
+- 使用钩子函数的方式，做数据校验
+
+```python
+from django.core.exceptions import ValidationError
+class UserModelForm(forms.ModelForm):
+    class Meta:
+        model = models.UserInfo
+        fields = ['name', 'password', 'age', 'gender', 'account', 'create_time', 'depart']
+    # 定义钩子方法命名规则为`clean_字段名`
+    def clean_name(self):
+        # 使用self.cleaned_data['字段'] 来获取用户请求发送过来的某一个数据
+        txt_name = self.cleaned_data["name"]
+        # 手动写校验要求，也是支持正则等等。
+        if len(txt_name) < 3:
+            raise ValidationError('长度不满足要求')
+        # 满足要求就直接返回
+        return txt_name
+```
+
+- ORM模型，`.exists()`判断是否已经存在某个值，`.exclude()`方法可以排除条件
+
+```python
+from django.core.exceptions import ValidationError
+class UserModelForm(forms.ModelForm):
+    class Meta:
+        model = models.UserInfo
+        fields = ['name', 'password', 'age', 'gender', 'account', 'create_time', 'depart']
+    def clean_name(self):
+        # 使用self.cleaned_data['字段'] 来获取用户请求发送过来的某一个数据
+        txt_name = self.cleaned_data["name"]
+        # ORM模型中，`.exclude()`方法可以排除条件，`.exists()`可以判断某个条件是否存在值
+        # `self.instance.pk`表示当前编辑哪一行的id
+        exits = models.UserInfo.objects.exclude(id = self.instance.pk).filter(name = txt_name).exists()
+        # 手动写校验要求，也是支持正则等等。
+        if exits:
+            raise ValidationError('姓名已经存在')
+        # 满足要求就直接返回
+        return txt_name
+```
+
+## 六、搜索功能的实现

@@ -28,4 +28,6 @@ urlpatterns = [
     # 用户管理
     path('user/info/', views.user_info),
     path('user/add/', views.user_add),
+    path('user/<int:nid>/edit/', views.user_edit),
+    path('user/<int:nid>/delete/', views.user_delete),
 ]

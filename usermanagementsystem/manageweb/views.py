@@ -84,4 +84,41 @@ def user_add(request):
         form.save()
         return redirect('/user/info/')
     # 数据校验失败
-    return render(request, 'user_add.html', {'form':form})
+    return render(request, 'user_add.html', {'form':form}) 
+
+def user_edit(request, nid):
+    # 根据用户ID获取第一条数据
+    first_obj = models.UserInfo.objects.filter(id = nid).first()
+    if request.method == 'GET':
+        # 实例化modelform对象，将返回的模型实例对象传递给instance参数，可以做到自动显示内容
+        form = UserModelForm(instance = first_obj)
+        return render(request, 'user_edit.html', {'form':form})
+    # 将请求获取到的参数传递给modelform，将查询对象传递给instance，表示修改这个实例的数据，否则会新增一条数据
+    form = UserModelForm(data = request.POST, instance = first_obj)
+    # 数据校验成功
+    if form.is_valid():
+        form.save()
+        return redirect('/user/info/')
+    # 数据校验失败
+    return render(request, 'user_edit.html/', {'form':form})
+
+def user_delete(requst, nid):
+    models.UserInfo.objects.filter(id = nid).delete()
+    return redirect('/user/info/')
+
+from django.core.exceptions import ValidationError
+class UserModelForm(forms.ModelForm):
+    class Meta:
+        model = models.UserInfo
+        fields = ['name', 'password', 'age', 'gender', 'account', 'create_time', 'depart']
+    def clean_name(self):
+        # 使用self.cleaned_data['字段'] 来获取用户请求发送过来的某一个数据
+        txt_name = self.cleaned_data["name"]
+        # ORM模型中，`.exclude()`方法可以排除条件，`.exists()`可以判断某个条件是否存在值
+        # `self.instance.pk`表示当前字段名实例的id
+        exits = models.UserInfo.objects.exclude(id = self.instance.pk).filter(name = txt_name).exists()
+        # 手动写校验要求，也是支持正则等等。
+        if exits:
+            raise ValidationError('姓名已经存在')
+        # 满足要求就直接返回
+        return txt_name
